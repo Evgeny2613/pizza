@@ -2,12 +2,17 @@ package com.pizza.pizza.controller;
 
 import com.pizza.pizza.entity.Cafe;
 import com.pizza.pizza.service.CafeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class CafeController {
@@ -21,7 +26,7 @@ public class CafeController {
     }
 
     @PostMapping("/cafe")
-    public ResponseEntity<Cafe> addCafe(@RequestBody Cafe cafe){
+    public ResponseEntity<Cafe> addCafe(@RequestBody @Valid Cafe cafe){
         return ResponseEntity.ok(cafeService.addCafe(cafe));
     }
 
@@ -31,7 +36,7 @@ public class CafeController {
     }
 
     @PutMapping("/cafe/{id}")
-    public ResponseEntity<Cafe> updateCafeById(@PathVariable Integer id, @RequestBody Cafe cafe){
+    public ResponseEntity<Cafe> updateCafeById(@PathVariable Integer id, @RequestBody @Valid Cafe cafe){
         return ResponseEntity.ok(cafeService.updateById(id, cafe));
     }
 
@@ -44,6 +49,22 @@ public class CafeController {
     @GetMapping("/cafesByAddress")
     public ResponseEntity<List<Cafe>> getAllCafesByAddress(@RequestParam String address){
         return ResponseEntity.ok(cafeService.getCafesByAddress(address));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex
+    ){
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(
+                error ->
+                        errors.put(
+                                ((FieldError) error).getField(),
+                                error.getDefaultMessage()
+                        )
+        );
+        return errors;
     }
 
 }

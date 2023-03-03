@@ -2,12 +2,18 @@ package com.pizza.pizza.controller;
 
 import com.pizza.pizza.entity.Pizza;
 import com.pizza.pizza.service.PizzaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class PizzaController {
@@ -21,7 +27,7 @@ public class PizzaController {
     }
 
     @PostMapping("/pizza")
-    public ResponseEntity<Pizza> addPizza(@RequestBody Pizza pizza){
+    public ResponseEntity<Pizza> addPizza(@RequestBody @Valid Pizza pizza){
         return ResponseEntity.ok(pizzaService.addPizza(pizza));
     }
 
@@ -31,7 +37,7 @@ public class PizzaController {
     }
 
     @PutMapping("/pizza/{id}")
-    public ResponseEntity<Pizza> updatePizza(@PathVariable Integer id, @RequestBody Pizza pizza){
+    public ResponseEntity<Pizza> updatePizza(@PathVariable Integer id, @RequestBody @Valid Pizza pizza){
         return ResponseEntity.ok(pizzaService.updatePizzaById(id, pizza));
     }
 
@@ -49,5 +55,21 @@ public class PizzaController {
     @GetMapping("/pizzasByName")
     public ResponseEntity<List<Pizza>> getAllPizzasByName(@RequestParam String name){
         return ResponseEntity.ok(pizzaService.findAllPizzasByName(name));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex
+    ){
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(
+                error ->
+                        errors.put(
+                                ((FieldError) error).getField(),
+                                error.getDefaultMessage()
+                        )
+        );
+        return errors;
     }
 }
