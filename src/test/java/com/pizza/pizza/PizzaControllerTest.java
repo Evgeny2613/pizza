@@ -1,64 +1,114 @@
 package com.pizza.pizza;
 
-import com.pizza.pizza.controller.CafeController;
-import com.pizza.pizza.entity.Cafe;
-import com.pizza.pizza.repository.CafeRepository;
-import com.pizza.pizza.service.CafeService;
+import com.google.gson.Gson;
+import com.pizza.pizza.controller.PizzaController;
+import com.pizza.pizza.entity.Pizza;
+import com.pizza.pizza.service.PizzaService;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.GsonJsonParser;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import java.sql.Time;
+import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(CafeController.class)
+@WebMvcTest(PizzaController.class)
 @RunWith(SpringRunner.class)
-@AutoConfigureMockMvc
+@WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
 public class PizzaControllerTest {
-
-    @MockBean
-    private CafeService cafeService;
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CafeRepository cafeRepository;
+    private PizzaService pizzaService;
 
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-    @Test
-   public void shouldCreateMockMVC(){
-        assertNotNull(mockMvc);
+    @Before()
+    public void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
-    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
-    public void createValidCafe() throws Exception{
-        Cafe cafe = new Cafe("TEST Name", "Berlin", "Address TEST City Country", "test@gmail.com", "+4929334855", Time.valueOf("10:00:00"), Time.valueOf("18:00:00"));
-        when(cafeService.addCafe(cafe)).thenReturn(cafe);
-
+    public void getAllPizzasByCafe() throws Exception{
+        Pizza pizza = new Pizza("Margarita", 1, 'M', "Cheese, Tomato", 7.0);
+        when(pizzaService.getAllPizzas()).thenReturn(List.of(pizza));
 
         mockMvc.perform(
-                post("/cafe")
-//                        .content("{\"name\": \"Valid Cafe Test\", \"city\": \"Berlin\", \"address\": \"Potsdamer Str. 148\", \"email\": \"test@gmail.com\", \"phone\": \"+4912345678\", \"openAt\": \"10:00:00\", \"closeAt\": \"18:00:00\"}")
-                        .content(String.valueOf(cafe))
+                get("/pizzas")
+                        .param("cafe_id", "1")
+        ).andExpect(status().isOk());
+
+        verify(pizzaService, Mockito.times(1)).getAllPizzas();
+    }
+
+    @Test
+    public void addPizza() throws Exception{
+        Pizza pizza = new Pizza("Margarita", 1, 'M', "Cheese, Tomato, TEST, TEST, TEST", 7.0);
+        Gson gson = new Gson();
+        String pizzaGson = gson.toJson(pizza);
+
+        mockMvc.perform(
+                post("/pizza")
+                        .content(pizzaGson)
+                        .contentType("application/json")
+        ).andExpect(status().isOk());
+}
+
+    @Test
+    public void updatePizzaById() throws Exception{
+        Pizza pizza = new Pizza("Margarita", 1, 'M', "Cheese, Tomato, TEST, TEST, TEST", 7.0);
+        Gson gson = new Gson();
+        String pizzaGson = gson.toJson(pizza);
+
+        mockMvc.perform(
+                put("/pizza/1")
+                        .content(pizzaGson)
                         .contentType("application/json")
         ).andExpect(status().isOk());
     }
+
+    @Test
+    public void DeletePizzaById() throws Exception{
+        mockMvc.perform(
+                delete("/pizza/1")
+        ).andExpect(status().isNoContent());
+
+        verify(pizzaService, Mockito.times(1)).deleteById(1);
+    }
+
+    @Test
+    public void getAllPizzas() throws Exception{
+        Pizza pizza = new Pizza("Margarita", 1, 'M', "Cheese, Tomato, TEST, TEST, TEST", 7.0);
+        when(pizzaService.getAllPizzas()).thenReturn(List.of(pizza));
+
+        mockMvc.perform(
+                get("/pizzas")
+        ).andExpect(status().isOk());
+
+        verify(pizzaService, Mockito.times(1)).getAllPizzas();
+    }
+
+    @Test
+    public void getPizzaByName() throws Exception {
+        mockMvc.perform(
+                get("/pizzas")
+                        .param("name", "Margarita")
+        ).andExpect(status().isOk());
+    }
+
 }
