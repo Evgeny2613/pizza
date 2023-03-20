@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfiguration {
+public class SecurityConfiguration{
 
     @Bean
     public static NoOpPasswordEncoder getEncoder() {
