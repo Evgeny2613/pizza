@@ -1,4 +1,3 @@
-/*
 The Pizza project is the web application that creates CRUD (create, read, update, delete) records for two entitites: pizza and cafe. 
 There is one to many dependency in it, which means that one pizza may be binded with only one cafe, while cafe can be binded to several pizzas.
 
@@ -15,4 +14,4 @@ The web project is secured for Post, Delete and Update request. Only admin users
 Others, admins and non-authentificated users are able to make Get requests.
 
 Also the program has the validation for entity fields. 
-*/
+
