@@ -28,7 +28,6 @@ public class SecurityConfiguration{
                                 .requestMatchers(HttpMethod.POST, "/cafe", "/pizza").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/cafe/{id}, /pizza/{id}").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/cafe/{id}", "/pizza/{id}").hasAnyRole("ADMIN")
-                                .anyRequest().authenticated()
                 )
 
                 .formLogin()

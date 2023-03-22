@@ -57,4 +57,5 @@ public class CafeSecurityTest {
         assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
     }
 
+
 }

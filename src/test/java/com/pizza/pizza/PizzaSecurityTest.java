@@ -8,7 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.logging.Handler;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,7 +23,7 @@ public class PizzaSecurityTest {
     private TestRestTemplate template;
 
     @Test
-    public void createPizzaAdmin() throws  Exception{
+    public void createPizzaAdmin() throws Exception {
         Pizza pizza = new Pizza("Margarita", 1, 'M', "Cheese, Tomato, TEST, TEST, TEST", 7.0);
 
         ResponseEntity<Pizza> actual = template.withBasicAuth("admin", "admin")
@@ -30,7 +33,7 @@ public class PizzaSecurityTest {
     }
 
     @Test
-    public void createPizzaUser() throws  Exception{
+    public void createPizzaUser() throws Exception {
         Pizza pizza = new Pizza("Margarita", 1, 'M', "Cheese, Tomato, TEST, TEST, TEST", 7.0);
 
         ResponseEntity<Pizza> actual = template.withBasicAuth("user", "user")
@@ -40,7 +43,7 @@ public class PizzaSecurityTest {
     }
 
     @Test
-    public void createPizzaNoAuth() throws  Exception{
+    public void createPizzaNoAuth() throws Exception {
         Pizza pizza = new Pizza("Margarita", 1, 'M', "Cheese, Tomato, TEST, TEST, TEST", 7.0);
 
         ResponseEntity<Pizza> actual = template
